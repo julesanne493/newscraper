@@ -15,7 +15,7 @@ var app = express();
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 
 mongoose.Promise = Promise;
-mongoose.connect(MONGODB_URI);
+mongoose.connect("mongodb:julesanne493@gmail.com:Linus616@ds235418.mlab.com:35418/heroku_ctq15v7s");
 
 app.use(logger("dev"));
 

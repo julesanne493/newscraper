@@ -1,4 +1,4 @@
-$(document).on("click", "p", function() {
+$(document).on("click", ".addNote", function() {
 
   var thisId = $(this).attr("data-id");
 
@@ -31,7 +31,7 @@ $(document).on("click", "p", function() {
 $(document).on("click", "#newScrape", function(){
   $.getJSON("/articles", function(data) {
     for (var i = 0; i < data.length; i++) {
-      $("#articles").append("<div class = 'card'> <div class='card-body'><h3><a class='card-title' href=" + data[i].link + " data-id=" + data[i]._id + "'>" + data[i].title + "</a></h3><p class='card-text'>" + data[i].summary + "</p></div></div>")
+      $("#articles").append("<div class = 'card'> <div class='card-body'><h3><a class='card-title' href=" + data[i].link + " data-id=" + data[i]._id + "'>" + data[i].title + "</a></h3><p class='card-text'>" + data[i].summary + "</p> <button class='btn btn-primary addNote'>View Comments</div></div>")
     }
   });
 
