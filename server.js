@@ -23,36 +23,30 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.static("public"));
 
-app.get("/scrape", function(req, res) {
+app.get("/articles", function(req, res) {
+  axios.get("https://www.wsj.com/").then(function(response) {
 
-    axios.get("https://www.wsj.com/").then(function(response) {
+var $ = cheerio.load(response.data);
 
-    var $ = cheerio.load(response.data);
+$("div.wsj-card-body").each(function(i, element) {
 
+  var result = {};
+  console.log($(this));
+  result.title = $(element).children("h3.wsj-headline").text();
+  result.link = $(element).children("h3.wsj-headline").children("a.wsj-headline-link").attr("href");
+  result.summary = $(element).children("p.wsj-summary").children("span").text();
 
-    $("div.wsj-card-body").each(function(i, element) {
-
-      var result = {};
-      console.log($(this));
-      result.title = $(element).children("h3.wsj-headline").text();
-      result.link = $(element).children("h3.wsj-headline").children("a.wsj-headline-link").attr("href");
-      result.summary = $(element).children("p.wsj-summary").children("span").text();
-
-      db.Article.create(result)
-        .then(function(dbArticle) {
-          console.log(dbArticle);
-        })
-        .catch(function(err) {
-         res.json(err);
-        });
+  db.Article.create(result)
+    .then(function(dbArticle) {
+      console.log(dbArticle);
+    })
+    .catch(function(err) {
+      res.json(err);
     });
-
-    res.send("Scrape Complete");
-  });
-  
 });
 
-app.get("/articles", function(req, res) {
+res.send();
+});
   db.Article.find({})
   .then(function(data){
     res.json(data)
@@ -68,26 +62,27 @@ app.get("/articles/:id", function(req, res) {
   .populate("note")
   .then(function(article){
     res.json(article);
+  })
+  .catch(function(err){
+    res.json(err);
+  })
   });
-  });
-
-  
 
 app.post("/articles/:id", function(req, res) {
-  id = req.params.id;
-
     db.Note.create(req.body)
       .then(function(dbNote){
-        return(db.Article.findOneAndUpdate({ _id: req.params.id}, { $set: {note: dbNote._id} }, {new: true}));
+        return db.Article.findOneAndUpdate({ _id: req.params.id}, {note: dbNote._id}, {new: true});
+      })
+      .then(function(dbArticle){
+        res.json(dbArticle)
+      })
+      .catch(function(err){
+        res.json(err);
+      })
 
-      });
-
-    db.Article.find({_id: req.params.id})
-      .update("Note")
-      .then(function(data){
-        res.json(data);
-      });
 });
+
+
 
 app.listen(PORT, function() {
   console.log("App running on port " + PORT + "!");
